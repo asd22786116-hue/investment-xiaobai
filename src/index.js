@@ -1,92 +1,72 @@
-import React, { useState, useEffect } from 'react'; 
+import React, { useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
-import { Bell, ShieldAlert, TrendingUp, Search, BookOpen, MessageCircle, Heart, AlertTriangle } from 'lucide-react';
+import { Bell, TrendingUp, Search, BookOpen, MessageCircle, Heart, AlertTriangle, ArrowUpRight } from 'lucide-react';
 
 function InvestmentApp() {
-  // --- 狀態管理 ---
   const [budget, setBudget] = useState(3000);
-  const [aiMsg, setAiMsg] = useState("嗨！我是妳的專屬小老師。今天想在哪個『馬卡龍』櫃位逛逛呢？");
+  const [aiMsg, setAiMsg] = useState("嗨！我是妳的專屬小老師。想知道怎麼用這 $3000 開始妳的第一步嗎？");
   const [activeTab, setActiveTab] = useState('recommend');
-  const [showNotification, setShowNotification] = useState(false);
 
-  // --- 模擬即時數據庫 ---
-  const stockList = [
-    { id: '2330', name: '台積電', risk: '穩健', tag: '必賺領頭羊', color: 'bg-[#BAE1FF]', text: 'text-blue-600', desc: '全世界最強的晶片工廠！雖然一張很貴，但我們可以買『碎碎的零股』。', price: 1000 },
-    { id: '2881', name: '富邦金', risk: '低', tag: '穩定領紅包', color: 'bg-[#BAFFC9]', text: 'text-green-600', desc: '妳正在用的銀行。它很會賺錢，每年都會發紅包（股息）給妳喔。', price: 75 },
-    { id: '3443', name: '創意', risk: '極高', tag: '隱藏黑馬', color: 'bg-[#FFFFBA]', text: 'text-yellow-600', desc: '做 AI 零件的公司。雖然冷門但很有前景，適合想賺大錢的小資女。', price: 1200 },
-    { id: '0050', name: '台灣50', risk: '極低', tag: '懶人首選', color: 'bg-[#BAE1FF]', text: 'text-blue-600', desc: '買這支等於買下台灣最強的50家公司，最適合定期定額。', price: 160 },
-    { id: '9999', name: '地雷工業', risk: '危險', tag: '必賠避雷', color: 'bg-[#FFB3BA]', text: 'text-red-600', desc: '公司老闆愛亂說話，且連年虧損。看到這顏色，快跑！', price: 10 },
-  ];
-
-  const filteredStocks = stockList.filter(s => {
-    if (activeTab === 'danger') return s.tag === '必賠避雷';
-    return s.tag !== '必賠避雷';
-  });
+  // 模擬即時股價，這就是未來要接 API 的地方
+  const [stocks, setStocks] = useState([
+    { id: '2330', name: '台積電', price: 1050, change: '+15', tag: '必賺領頭羊', color: 'bg-[#BAE1FF]', text: 'text-blue-600', desc: '最強晶片工廠！買不起一張也沒關係，我們可以買零股。' },
+    { id: '2881', name: '富邦金', price: 92.5, change: '+0.5', tag: '穩定領紅包', color: 'bg-[#BAFFC9]', text: 'text-green-600', desc: '很會賺錢的銀行。每年發股息給妳，適合長期存錢。' },
+    { id: '3443', name: '創意', price: 1240, change: '-20', tag: '隱藏黑馬', color: 'bg-[#FFFFBA]', text: 'text-yellow-600', desc: 'AI 概念股，波動較大但潛力驚人，適合追求成長的妳。' },
+    { id: '0050', name: '台灣50', price: 188.4, change: '+1.2', tag: '懶人首選', color: 'bg-[#E1BAFF]', text: 'text-purple-600', desc: '一次買下台灣最強50家公司，不用煩惱選哪支。' }
+  ]);
 
   const askAI = (q) => {
-    const responses = {
-      '定期定額怎麼改?': '到富邦 App 找『台股定期定額』，點進『變更』就能改每個月投多少錢囉！',
-      '什麼是交割?': '簡單說就是『付錢的日子』。買完股票兩天後，戶頭一定要有錢，不然會變壞小孩（違約）。',
-      '現在能買嗎?': '看現在是綠燈還是紅燈！綠燈（馬卡龍綠）代表特價中，紅燈就先等等喔。',
-      '手續費優惠': '富邦現在定期定額有 1 元優惠！省下的錢可以多喝一杯珍奶。'
+    const chat = {
+      '定期定額怎麼改?': '直接去富邦 App 點「台股定期定額」，選擇「變更扣款金額」就可以囉！',
+      '什麼是交割?': '就是「買股票付錢的日子」。買完後兩天(T+2)記得戶頭要有錢，不然會信用破產喔！',
+      '手續費優惠': '現在定期定額很多券商只要 1 元，省下的手續費又可以多買一股了。'
     };
-    setAiMsg(responses[q] || "這個術語太難了，我用五歲小孩的話幫妳查查...");
+    setAiMsg(chat[q] || "讓我想想...正在幫妳查詢最簡單的解釋！");
   };
 
   return (
-    <div className="max-w-md mx-auto bg-white min-h-screen text-slate-800 font-sans pb-24 shadow-2xl overflow-x-hidden">
-      {/* 頂部導航 */}
-      <header className="p-6 flex justify-between items-center bg-white/80 backdrop-blur-md sticky top-0 z-50">
+    <div className="max-w-md mx-auto bg-[#FCFCFC] min-h-screen pb-24 shadow-xl overflow-x-hidden">
+      {/* 頂部導航 - 毛玻璃效果 */}
+      <header className="p-6 flex justify-between items-center sticky top-0 bg-white/70 backdrop-blur-lg z-50">
         <div>
-          <h1 className="text-2xl font-black text-slate-800 tracking-tighter">投資小白 <span className="text-pink-400">♥</span></h1>
-          <div className="flex items-center gap-1 mt-1">
-            <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-            <p className="text-[10px] text-gray-400 font-bold uppercase">秒級實時監控中</p>
-          </div>
+          <h1 className="text-2xl font-black italic tracking-tighter text-slate-800">投資小白 <span className="text-pink-400">♥</span></h1>
+          <p className="text-[10px] text-green-500 font-bold tracking-widest uppercase flex items-center gap-1">
+            <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-ping"></span> 秒級實時監控中
+          </p>
         </div>
-        <button onClick={() => setShowNotification(!showNotification)} className="p-2 bg-gray-50 rounded-2xl relative text-gray-400">
+        <div className="bg-slate-100 p-2 rounded-2xl text-slate-400 hover:text-slate-600 transition-colors cursor-pointer">
           <Bell size={20} />
-          {showNotification && <span className="absolute top-2 right-2 w-2 h-2 bg-red-400 rounded-full border-2 border-white"></span>}
-        </button>
+        </div>
       </header>
 
-      {/* 通知 */}
-      {showNotification && (
-        <div className="mx-6 mb-4 p-4 bg-[#FFF0F5] border border-pink-100 rounded-2xl">
-          <p className="text-xs text-pink-600 font-bold flex items-center gap-2">
-            <AlertTriangle size={14} /> 發現新狀況！
-          </p>
-          <p className="text-[11px] text-pink-500 mt-1">有一家新公司上市了，且符合妳的預算，要看看嗎？</p>
-        </div>
-      )}
-
-      {/* 預算 */}
+      {/* 預算看板 */}
       <section className="px-6 py-4">
-        <div className="bg-[#FDFCF0] p-6 rounded-[40px] border border-[#F0EAD6] shadow-inner">
-          <label className="text-[10px] text-gray-400 font-black uppercase tracking-widest">目前想投的資金 (TWD)</label>
-          <div className="flex items-center mt-1">
-            <span className="text-2xl font-bold text-gray-300 mr-1">$</span>
+        <div className="bg-white p-6 rounded-[35px] border border-slate-100 shadow-sm transition-all hover:shadow-md">
+          <label className="text-[10px] text-slate-400 font-black tracking-[0.2em] uppercase">預計投入資金 (TWD)</label>
+          <div className="flex items-end gap-2 mt-2">
+            <span className="text-2xl font-bold text-slate-300 mb-1">$</span>
             <input 
               type="number" 
               value={budget}
               onChange={(e) => setBudget(e.target.value)}
-              className="bg-transparent text-3xl font-black focus:outline-none w-full text-slate-700"
+              className="bg-transparent text-4xl font-black focus:outline-none w-full text-slate-700"
             />
           </div>
         </div>
       </section>
 
-      {/* AI 老師 */}
+      {/* AI 教學區 */}
       <section className="px-6 py-2">
-        <div className="bg-[#BAE1FF]/20 p-6 rounded-[40px] relative">
-          <div className="flex gap-3">
-            <div className="bg-white p-2 rounded-2xl shadow-sm h-fit"><MessageCircle size={20} className="text-blue-400" /></div>
+        <div className="bg-slate-900 text-white p-6 rounded-[35px] shadow-lg relative overflow-hidden">
+          <MessageCircle className="absolute -right-4 -top-4 opacity-10" size={100} />
+          <div className="flex gap-4 relative z-10">
+            <div className="w-10 h-10 bg-gradient-to-tr from-pink-400 to-blue-400 rounded-2xl flex-shrink-0 animate-pulse"></div>
             <div>
-              <p className="text-sm font-bold text-blue-800 mb-4">{aiMsg}</p>
-              <div className="flex gap-2 overflow-x-auto no-scrollbar">
-                {['定期定額怎麼改?', '什麼是交割?', '手續費優惠'].map(q => (
-                  <button key={q} onClick={() => askAI(q)} className="whitespace-nowrap bg-white/80 px-4 py-2 rounded-full text-[10px] font-black text-blue-500 shadow-sm hover:bg-blue-500 hover:text-white transition-all">
-                    {q}
+              <p className="text-sm font-medium leading-relaxed opacity-90">{aiMsg}</p>
+              <div className="flex gap-2 mt-4 overflow-x-auto no-scrollbar pb-1">
+                {['定期定額怎麼改?', '什麼是交割?', '手續費優惠'].map(btn => (
+                  <button key={btn} onClick={() => askAI(btn)} className="whitespace-nowrap bg-white/10 hover:bg-white/20 px-4 py-2 rounded-full text-[10px] font-bold transition-all border border-white/5">
+                    {btn}
                   </button>
                 ))}
               </div>
@@ -95,51 +75,64 @@ function InvestmentApp() {
         </div>
       </section>
 
-      {/* 分類標籤 */}
-      <nav className="flex px-10 mt-8 gap-8">
-        <button onClick={() => setActiveTab('recommend')} className={`pb-2 text-sm font-black transition-all ${activeTab === 'recommend' ? 'text-[#88D8B0] border-b-4 border-[#88D8B0]' : 'text-gray-300'}`}>
-          適合我的
-        </button>
-        <button onClick={() => setActiveTab('danger')} className={`pb-2 text-sm font-black transition-all ${activeTab === 'danger' ? 'text-[#FFB3BA] border-b-4 border-[#FFB3BA]' : 'text-gray-300'}`}>
-          必賠避雷
-        </button>
+      {/* 標籤導航 */}
+      <nav className="flex px-8 mt-8 gap-8 border-b border-slate-50">
+        {['recommend', 'danger'].map(tab => (
+          <button 
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`pb-4 text-sm font-black transition-all relative ${activeTab === tab ? 'text-slate-800' : 'text-slate-300'}`}
+          >
+            {tab === 'recommend' ? '適合我的' : '必賠避雷'}
+            {activeTab === tab && <span className={`absolute bottom-0 left-0 w-full h-1 rounded-full ${tab === 'recommend' ? 'bg-blue-400' : 'bg-red-400'}`}></span>}
+          </button>
+        ))}
       </nav>
 
-      {/* 股票清單 */}
-      <main className="px-6 py-4 space-y-6">
-        {filteredStocks.map(stock => (
-          <div key={stock.id} className="bg-white border border-gray-50 p-6 rounded-[40px] shadow-sm hover:shadow-xl transition-all">
+      {/* 股票卡片清單 */}
+      <main className="px-6 py-6 space-y-6">
+        {stocks.map(stock => (
+          <div key={stock.id} className="bg-white border border-slate-50 p-6 rounded-[40px] shadow-sm hover:translate-y-[-4px] transition-all">
             <div className="flex justify-between items-start">
-              <div className="flex items-center gap-3">
-                <div className={`w-3 h-12 rounded-full ${stock.color} opacity-80`}></div>
+              <div className="flex items-center gap-4">
+                <div className={`w-12 h-12 rounded-2xl ${stock.color} flex items-center justify-center font-black text-white text-xs`}>
+                  {stock.id.slice(0,2)}
+                </div>
                 <div>
-                  <h3 className="font-black text-xl text-slate-800">{stock.name}</h3>
-                  <div className="flex gap-2 mt-1">
-                    <span className="text-[10px] bg-gray-100 text-gray-400 px-2 py-0.5 rounded-md font-bold uppercase">代號 {stock.id}</span>
-                  </div>
+                  <h3 className="font-bold text-lg text-slate-800">{stock.name}</h3>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{stock.id}</p>
                 </div>
               </div>
-              <span className={`${stock.color} ${stock.text} text-[10px] px-4 py-1.5 rounded-full font-black shadow-sm`}>
-                {stock.tag}
-              </span>
+              <div className="text-right">
+                <p className="text-xl font-black text-slate-800">${stock.price}</p>
+                <p className={`text-[10px] font-bold ${stock.change.includes('+') ? 'text-green-500' : 'text-red-500'}`}>
+                  {stock.change} (今日)
+                </p>
+              </div>
             </div>
-            <p className="mt-5 text-xs text-gray-500 leading-relaxed font-medium">“ {stock.desc} ”</p>
+            
+            <div className="mt-4 p-4 bg-slate-50/50 rounded-[25px]">
+              <div className="flex items-center gap-2 mb-2">
+                <span className={`w-2 h-2 rounded-full ${stock.change.includes('+') ? 'bg-green-400' : 'bg-red-400'}`}></span>
+                <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider">{stock.tag}</span>
+              </div>
+              <p className="text-xs text-slate-500 leading-relaxed italic">“{stock.desc}”</p>
+            </div>
           </div>
         ))}
       </main>
 
-      {/* 底部導航 */}
-      <div className="fixed bottom-0 w-full max-w-md bg-white/90 backdrop-blur-xl border-t border-gray-50 p-6 flex justify-around items-center rounded-t-[40px] shadow-2xl">
-        <TrendingUp className="text-[#88D8B0] cursor-pointer" size={26} />
-        <Search className="text-gray-200 cursor-pointer" size={26} />
-        <Heart className="text-[#FFB3BA] cursor-pointer" size={26} />
-        <BookOpen className="text-[#BAE1FF] cursor-pointer" size={26} />
+      {/* 底部功能列 */}
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md bg-white/90 backdrop-blur-xl border border-white shadow-2xl p-4 flex justify-around items-center rounded-[30px] z-[100]">
+        <div className="p-3 bg-blue-50 text-blue-500 rounded-2xl cursor-pointer"><TrendingUp size={22} /></div>
+        <div className="p-3 text-slate-300 hover:text-slate-500 transition-colors cursor-pointer"><Search size={22} /></div>
+        <div className="p-3 text-slate-300 hover:text-slate-500 transition-colors cursor-pointer"><Heart size={22} /></div>
+        <div className="p-3 text-slate-300 hover:text-slate-500 transition-colors cursor-pointer"><BookOpen size={22} /></div>
       </div>
     </div>
   );
 }
 
-// --- 這裡是關鍵！要把 App 渲染到 HTML 的 root 節點 ---
 const container = document.getElementById('root');
 const root = createRoot(container);
 root.render(<InvestmentApp />);
