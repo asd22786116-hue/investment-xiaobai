@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'; 
 import { Bell, ShieldAlert, TrendingUp, Search, BookOpen, MessageCircle, Heart, AlertTriangle } from 'lucide-react';
 
 export default function InvestmentApp() {
